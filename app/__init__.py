@@ -9,7 +9,12 @@ def create_app():
     print("App configured with:", app.config)
 
     register_extensions(app)
+    register_blueprints(app)
     return app
+
+def register_blueprints(app):
+    from .blueprints.main import bp as main_bp
+    app.register_blueprint(main_bp)
 
 
 def register_extensions(app):
@@ -17,3 +22,8 @@ def register_extensions(app):
 
     db.init_app(app)
     login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from .models import User
+        return User.query.get(int(user_id))
