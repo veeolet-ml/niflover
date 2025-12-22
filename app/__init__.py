@@ -6,7 +6,6 @@ def create_app():
 
     # Configuration settings can be added here
     app.config.from_object(Config)
-    print("App configured with:", app.config)
 
     register_extensions(app)
     register_blueprints(app)
