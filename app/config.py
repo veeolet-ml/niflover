@@ -12,3 +12,4 @@ class Config:
     DEBUG = os.getenv('DEBUG', 'False') == 'True'
     SQLALCHEMY_DATABASE_URI = db_url.replace("sqlite:///", f"sqlite:///{BASE_DIR}/")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    WTF_CSRF_ENABLED = True

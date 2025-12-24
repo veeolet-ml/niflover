@@ -15,12 +15,18 @@ def register_blueprints(app):
     from .blueprints.main import bp as main_bp
     app.register_blueprint(main_bp)
 
+    from .blueprints.auth import bp as auth_bp
+    app.register_blueprint(auth_bp)
+
 
 def register_extensions(app):
-    from .extensions import db, login_manager
+    from .extensions import db, login_manager, migrate
 
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
+
+    from . import models
 
     @login_manager.user_loader
     def load_user(user_id):
