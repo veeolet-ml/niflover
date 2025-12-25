@@ -2,7 +2,7 @@ from collections import deque
 
 import pygame
 
-from grid import GridEntity, Grid, CellType
+from games.snake.snake_grid import GridEntity, SnakeGrid, CellType
 
 
 def _add_pair(a, b):
@@ -32,12 +32,13 @@ class Snake(GridEntity):
         body: deque[(int, int)] the snake's body
         direction: str ("RIGHT", "LEFT", "UP", "DOWN") snake direction
     """
-    def __init__(self, row: int, col: int, grid: Grid) -> None:
+    def __init__(self, row: int, col: int, grid: SnakeGrid) -> None:
         self.body = deque([(row, col), (row + 1, col), (row + 2, col)])
         self.direction = "RIGHT"
         grid.set_snake_cell((row, col))
         grid.set_snake_cell((row + 1, col))
         grid.set_snake_cell((row + 2, col))
+        self.length = 3
 
 
     def handle_key(self, event: pygame.event.Event) -> None:
@@ -50,9 +51,18 @@ class Snake(GridEntity):
         elif event.key == pygame.K_RIGHT and self.direction != "LEFT":
             self.direction = "RIGHT"
 
-    def update(self, grid: Grid) -> None:
+    def update(self, grid: SnakeGrid) -> bool:
         new_head = _add_pair(self.body[-1], _convert_direction(self.direction))
+        row, col = new_head
+        if row < 0 or row >= grid.blocks_per_height or col < 0 or col >= grid.blocks_per_width:
+            return True
         self.body.append(new_head)
+        ate = grid.get_cell(new_head) == CellType.FOOD
+        if grid.get_cell(new_head) == CellType.SNAKE:
+            return True
         grid.set_snake_cell(new_head)
-        grid.set_empty_cell(self.body.popleft())
-
+        if not ate:
+            grid.set_empty_cell(self.body.popleft())
+        else:
+            self.length += 1
+        return False
