@@ -21,11 +21,11 @@ class CellType(Enum):
 class GridEntity(ABC):
 
     @abstractmethod
-    def update(self, grid: Grid) -> None:
+    def update(self, grid: SnakeGrid) -> None:
         pass
 
 
-class Grid:
+class SnakeGrid:
     """ The grid in which the snake is drawn
 
     Attributes:
