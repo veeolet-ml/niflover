@@ -1,9 +1,18 @@
+import random
 from collections import deque
 
 import pygame
 
 from games.snake.snake_grid import GridEntity, SnakeGrid, CellType
 
+# I know this is not OOP but snake is the only one playing sound effects
+# A sound playing class would be overkill
+pygame.mixer.init()
+sfx = [pygame.mixer.Sound('sounds/pickup_1.wav'),
+      pygame.mixer.Sound('sounds/pickup_2.wav')]
+
+def play_random_sound() -> None:
+    random.choice(sfx).play()
 
 def _add_pair(a, b):
     (x, y) = a
@@ -65,4 +74,6 @@ class Snake(GridEntity):
             grid.set_empty_cell(self.body.popleft())
         else:
             self.length += 1
+            play_random_sound()
+
         return False

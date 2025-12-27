@@ -47,6 +47,9 @@ class SnakeGame:
 
         self.hud = HUD(self.screen)
 
+        pygame.mixer.init()
+        pygame.mixer.music.load("sounds/retro-arcade-game-music.mp3")
+
     def reset_game(self):
         self.grid = SnakeGrid(self.screen.get_width(), int(self.screen.get_height() * 4 / 5),
                               50, 20)
@@ -76,7 +79,7 @@ class SnakeGame:
         self.delta += dt
 
     def run(self) -> None:
-
+        pygame.mixer.music.play(loops=-1)
         while self.running:
             self.events = pygame.event.get()
             for event in self.events:
