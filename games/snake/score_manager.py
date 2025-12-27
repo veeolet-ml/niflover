@@ -1,4 +1,5 @@
 import pygame
+from pygame.display import update
 
 from games.snake.snake import Snake
 
@@ -10,20 +11,16 @@ class ScoreManager:
     Attributes:
         snake: Snake the snake
         score: int Current score
+        high_score: int High score
     """
-    def __init__(self, snake: Snake):
+    def __init__(self, snake: Snake, high_score: int = 0) -> None:
         self.snake = snake
         self.score = 0
-        self.font = pygame.font.SysFont("monospace", 50)
+        self.high_score = high_score
+        update()
 
     def update(self) -> None:
         self.score = self.snake.length
+        if self.score > self.high_score:
+            self.high_score = self.score
 
-    def draw(self, screen: pygame.Surface) -> None:
-        left = screen.width * 4 // 5
-        right = screen.width
-        top = screen.height * 4 // 5
-        bottom = screen.height
-
-        text_surface = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
-        screen.blit(text_surface, (left, top))

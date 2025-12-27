@@ -19,6 +19,7 @@ class GridEntity(ABC):
 
     @abstractmethod
     def update(self, grid: SnakeGrid) -> bool:
+        """Runs a step on the grid and returns True if game is over"""
         pass
 
 
@@ -34,7 +35,7 @@ class SnakeGrid:
         entities: list[GridEntity] The entities in the grid that act on it (i.e. visitors)
     """
 
-    def __init__(self, width: int, height: int, blocks_per_width: int, blocks_per_height: int):
+    def __init__(self, width: int, height: int, blocks_per_width: int, blocks_per_height: int) -> None:
         self.width = width
         self.height = height
         self.blocks_per_width = blocks_per_width
@@ -89,7 +90,7 @@ class SnakeGrid:
         row, col = cell
         self.grid[row][col] = CellType.NOTHING
 
-    def set_food_cell(self, cell: tuple[int, int]):
+    def set_food_cell(self, cell: tuple[int, int]) -> None:
         row, col = cell
         self.grid[row][col] = CellType.FOOD
 

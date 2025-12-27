@@ -27,7 +27,7 @@ class GameState(Enum):
 
 class SnakeGame:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.events = None
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -45,12 +45,12 @@ class SnakeGame:
         self.delta = 0
         self.game_state = GameState.START_GAME
 
-        self.hud = HUD(self.screen)
+        self.hud = HUD(self.screen, self.score_manager)
 
         pygame.mixer.init()
         pygame.mixer.music.load("sounds/retro-arcade-game-music.mp3")
 
-    def reset_game(self):
+    def reset_game(self) -> None:
         self.grid = SnakeGrid(self.screen.get_width(), int(self.screen.get_height() * 4 / 5),
                               50, 20)
         rand_col = random.randint(10, self.grid.blocks_per_width - 10)
@@ -59,7 +59,9 @@ class SnakeGame:
         self.grid.register_entity(self.snake)
         self.food_manager = FoodManager(1)
         self.grid.register_entity(self.food_manager)
-        self.score_manager = ScoreManager(self.snake)
+        high_score = self.score_manager.high_score
+        self.score_manager = ScoreManager(self.snake, high_score=high_score)
+        self.hud = HUD(self.screen, self.score_manager)
         self.delta = 0
 
 
@@ -101,7 +103,7 @@ class SnakeGame:
         pygame.quit()
 
 
-    def start_game(self):
+    def start_game(self) -> None:
         self.hud.draw_start()
         for event in self.events:
             if event.type == pygame.KEYDOWN:
@@ -128,9 +130,7 @@ class SnakeGame:
             self.score_manager.update()
 
         self.grid.draw(self.screen)
-        self.score_manager.draw(self.screen)
-
-        self._post_frame_display()
+        self.hud.draw_running()
 
     def game_over(self) -> None:
         self.hud.draw_game_over()
