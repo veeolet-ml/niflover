@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from datetime import datetime, timezone
 from sqlalchemy import UniqueConstraint, CheckConstraint
+from werkzeug.security import generate_password_hash, check_password_hash
 from ..extensions import db
 
 class User(UserMixin, db.Model):
@@ -44,6 +45,12 @@ class User(UserMixin, db.Model):
     __table_args__ = (
         CheckConstraint('length(username) >= 3', name='ck_user_username_length'),
     )
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 user_hobby = db.Table(
     'user_hobby',

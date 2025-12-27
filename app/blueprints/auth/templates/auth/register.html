@@ -22,6 +22,14 @@
             </div>
 
             <div class="mb-3">
+              {{ form.display_name.label(class="form-label") }} {{
+              form.display_name(class="form-control") }} {%
+              for e in form.display_name.errors %}
+              <div class="text-danger small">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
               {{ form.email.label(class="form-label") }} {{
               form.email(class="form-control") }}
               {% for e in form.email.errors %}
