@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, current_user
 from . import bp
 from .forms import RegistrationForm, LoginForm
 from ...extensions import db
@@ -7,6 +7,9 @@ from ...models import User
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
+    if hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+
     login_form = LoginForm()
 
     if login_form.validate_on_submit():
@@ -21,6 +24,9 @@ def login():
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
+    if hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
     register_form = RegistrationForm()
 
     if register_form.validate_on_submit():

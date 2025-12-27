@@ -16,7 +16,6 @@ def user():
 @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True) 
 @with_appcontext
 def create_user(username, email, display_name, password):
-    """Create a new user."""
     user = User(
         username=username,
         email=email,

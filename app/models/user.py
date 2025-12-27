@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from enum import Enum
 from datetime import datetime, timezone
 from sqlalchemy import UniqueConstraint, CheckConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -91,3 +92,24 @@ class UserGameStat(db.Model):
     __table_args__ = (
         CheckConstraint('high_score >= 0', name='ck_usergamestat_high_score_nonnegative'),
     )
+
+class ActionType(str, Enum):
+    LIKE = 'like'
+    PASS = 'pass'
+
+class UserAction(db.Model):
+    __tablename__ = 'user_action'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, index=True)
+    target_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False, index=True)
+
+    action = db.Column(db.Enum(ActionType, name="action_type"), nullable=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('actor_id', 'target_id', name='uq_useraction_actor_target'),
+        CheckConstraint('actor_id != target_id', name='ck_useraction_no_self_action'),
+    )
+
