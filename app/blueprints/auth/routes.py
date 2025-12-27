@@ -39,8 +39,8 @@ def register():
             register_form.username.errors.append('Username or email already exists.')
             return render_template('auth/register.html', form=register_form)
 
-    login_user(user)
-    return redirect(url_for('main.index'))
+        login_user(user)
+        return redirect(url_for('main.index'))
 
     return render_template('auth/register.html', form=register_form)
 

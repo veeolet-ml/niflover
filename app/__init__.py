@@ -9,6 +9,7 @@ def create_app():
 
     register_extensions(app)
     register_blueprints(app)
+    register_cli_commands(app)
     return app
 
 def register_blueprints(app):
@@ -32,3 +33,7 @@ def register_extensions(app):
     def load_user(user_id):
         from .models import User
         return User.query.get(int(user_id))
+
+def register_cli_commands(app):
+    from .cli.users import user as user_cli
+    app.cli.add_command(user_cli)
