@@ -79,6 +79,7 @@ class SnakeGame:
 
         dt = self.clock.tick(60)  # limits FPS to 60 and gets ms delta
         self.delta += dt
+        self.hud.update(dt)  # Update HUD color fading
 
     def run(self) -> None:
         pygame.mixer.music.play(loops=-1)
