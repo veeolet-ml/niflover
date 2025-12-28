@@ -117,6 +117,11 @@ class HUD:
             center=(self.screen.get_width() // 2, self.screen.get_height() // 4)
         )
 
+        self.you_win_surf = self.font_big.render("YOU WIN!", True, color)
+        self.you_win_rect = self.you_win_surf.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 4)
+        )
+
         self.restart_surf = self.font_small.render("Press R to restart", True, color)
         self.restart_rect = self.restart_surf.get_rect(
             center=(self.screen.get_width() // 2, self.screen.get_height() // 2)
@@ -164,6 +169,9 @@ class HUD:
         self.screen.blit(hint_surf, hint_rect)
 
     def draw_game_over(self) -> None:
-        self.screen.blit(self.game_over_surf, self.game_over_rect)
+        if self.score_manager.score >= 1000:
+            self.screen.blit(self.you_win_surf, self.you_win_rect)
+        else:
+            self.screen.blit(self.game_over_surf, self.game_over_rect)
         self.screen.blit(self.restart_surf, self.restart_rect)
         self.screen.blit(self.quit_surf, self.quit_rect)
