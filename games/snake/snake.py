@@ -51,13 +51,13 @@ class Snake(GridEntity):
 
 
     def handle_key(self, event: pygame.event.Event) -> None:
-        if event.key == pygame.K_UP and self.direction != "DOWN":
+        if (event.key == pygame.K_UP or event.key == pygame.K_w) and self.direction != "DOWN":
             self.direction = "UP"
-        elif event.key == pygame.K_DOWN and self.direction != "UP":
+        elif (event.key == pygame.K_DOWN or event.key == pygame.K_s) and self.direction != "UP":
             self.direction = "DOWN"
-        elif event.key == pygame.K_LEFT and self.direction != "RIGHT":
+        elif (event.key == pygame.K_LEFT or event.key == pygame.K_a) and self.direction != "RIGHT":
             self.direction = "LEFT"
-        elif event.key == pygame.K_RIGHT and self.direction != "LEFT":
+        elif (event.key == pygame.K_RIGHT or event.key == pygame.K_d) and self.direction != "LEFT":
             self.direction = "RIGHT"
 
     def update(self, grid: SnakeGrid) -> bool:
