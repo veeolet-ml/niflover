@@ -2,6 +2,7 @@ import random
 from enum import Enum
 
 import pygame
+from pygame_textinput import TextInputVisualizer
 
 from games.snake.HUD import HUD
 from games.snake.food_manager import FoodManager
@@ -23,6 +24,8 @@ class GameState(Enum):
     START_GAME = 0
     GAME_RUNNING = 1
     GAME_OVER = 2
+    INPUT_USERNAME = 3
+    INPUT_PASSWORD = 4
 
 
 class SnakeGame:
@@ -49,6 +52,13 @@ class SnakeGame:
 
         pygame.mixer.init()
         pygame.mixer.music.load("sounds/retro-arcade-game-music.mp3")
+
+        pygame.key.set_repeat(200, 50)
+
+        self.username_visualiser = TextInputVisualizer(font_object=self.hud.font_small,
+                                                       font_color=(255, 255, 255))
+        self.password_visualiser = TextInputVisualizer(font_object=self.hud.font_small,
+                                                       font_color=(255, 255, 255))
 
     def reset_game(self) -> None:
         self.grid = SnakeGrid(self.screen.get_width(), int(self.screen.get_height() * 4 / 5),
@@ -98,6 +108,10 @@ class SnakeGame:
                     self.run_game()
                 case GameState.GAME_OVER:
                     self.game_over()
+                case GameState.INPUT_USERNAME:
+                    self.input_username()
+                case GameState.INPUT_PASSWORD:
+                    self.input_password()
 
             self._post_frame_display()
 
@@ -142,6 +156,42 @@ class SnakeGame:
                 if event.key == pygame.K_r:
                     self.reset_game()
                     self.game_state = GameState.GAME_RUNNING
+                if event.key == pygame.K_SPACE:
+                    self.game_state = GameState.INPUT_USERNAME
+
+    def input_username(self) -> None:
+        self.hud.draw_input_username()
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    self.game_state = GameState.INPUT_PASSWORD
+                if event.key == pygame.K_TAB:
+                    self.game_state = GameState.GAME_OVER
+        self.username_visualiser.update(self.events)
+        input_rect = self.username_visualiser.surface.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 2)
+        )
+        self.screen.blit(self.username_visualiser.surface, input_rect)
+
+    def input_password(self) -> None:
+        self.hud.draw_input_password()
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    self.submit_results()
+                    self.game_state = GameState.GAME_OVER
+                if event.key == pygame.K_TAB:
+                    self.game_state = GameState.INPUT_USERNAME
+        self.password_visualiser.update(self.events)
+        input_rect = self.password_visualiser.surface.get_rect(
+            center=(self.screen.get_width() // 2, self.screen.get_height() // 2)
+        )
+        self.screen.blit(self.password_visualiser.surface, input_rect)
+
+    def submit_results(self):
+        """TODO: add POST request to submit results when database api is finished"""
+        print(f"High score: {self.score_manager.high_score}")
+        pass
 
 
 def main():
