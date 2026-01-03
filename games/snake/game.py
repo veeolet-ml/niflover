@@ -4,11 +4,11 @@ from enum import Enum
 import pygame
 from pygame_textinput import TextInputVisualizer
 
-from games.snake.HUD import HUD
-from games.snake.food_manager import FoodManager
-from games.snake.score_manager import ScoreManager
-from games.snake.snake_grid import SnakeGrid
-from games.snake.snake import Snake
+from HUD import HUD
+from food_manager import FoodManager
+from score_manager import ScoreManager
+from snake_grid import SnakeGrid
+from snake import Snake
 
 BLACK = (0, 0, 0)
 
@@ -194,11 +194,5 @@ class SnakeGame:
         pass
 
 
-def main():
-    SnakeGame().run()
 
-
-
-if __name__ == "__main__":
-    exit(main())
 
