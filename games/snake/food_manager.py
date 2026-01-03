@@ -1,6 +1,6 @@
 import random
 
-from games.snake.snake_grid import GridEntity, SnakeGrid, CellType
+from snake_grid import GridEntity, SnakeGrid, CellType
 
 
 def _count_food(grid: SnakeGrid) -> int:

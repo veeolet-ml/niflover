@@ -1,12 +1,20 @@
+import os
 import random
 from collections import deque
+from pathlib import Path
 
 import pygame
 
-from games.snake.snake_grid import GridEntity, SnakeGrid, CellType
+from snake_grid import GridEntity, SnakeGrid, CellType
 
 # I know this is not OOP but snake is the only one playing sound effects
 # A sound playing class would be overkill
+
+# ensure cwd is current file location
+file = Path(__file__)
+parent = file.parent
+os.chdir(parent)
+
 pygame.mixer.init()
 sfx = [pygame.mixer.Sound('sounds/pickup_1.wav'),
       pygame.mixer.Sound('sounds/pickup_2.wav')]

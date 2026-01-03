@@ -1,7 +1,7 @@
 import pygame
 from pygame.display import update
 
-from games.snake.snake import Snake
+from snake import Snake
 
 
 class ScoreManager:

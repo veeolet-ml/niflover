@@ -4,7 +4,7 @@ from typing import Sequence
 
 import pygame
 
-from games.snake.score_manager import ScoreManager
+from score_manager import ScoreManager
 
 
 def _render_wrapped_text(text: str, font: pygame.font.Font, color: pygame.Color | Sequence[int] | int | str,
