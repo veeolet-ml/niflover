@@ -1,0 +1,181 @@
+{# templates/profile.html #}
+{% extends "base.html" %}
+
+{% block title %}{{ user.display_name }} • Profile{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- LEFT: Photos -->
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="fw-semibold">Photos</span>
+        <span class="badge text-bg-secondary">{{ user.photos|length }}</span>
+      </div>
+
+      <div class="card-body p-0">
+        {% if user.photos and user.photos|length > 0 %}
+          <div id="profilePhotosCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              {% for photo in user.photos %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                  <img
+                    src="{{ url_for('static', filename=photo.path) }}"
+                    class="d-block w-100"
+                    style="aspect-ratio: 4 / 5; object-fit: cover;"
+                    alt="User photo {{ loop.index }}"
+                    loading="lazy"
+                  />
+                </div>
+              {% endfor %}
+            </div>
+
+            {% if user.photos|length > 1 %}
+              <button class="carousel-control-prev" type="button" data-bs-target="#profilePhotosCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#profilePhotosCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+
+              <div class="carousel-indicators">
+                {% for photo in user.photos %}
+                  <button
+                    type="button"
+                    data-bs-target="#profilePhotosCarousel"
+                    data-bs-slide-to="{{ loop.index0 }}"
+                    class="{% if loop.first %}active{% endif %}"
+                    aria-current="{% if loop.first %}true{% else %}false{% endif %}"
+                    aria-label="Slide {{ loop.index }}"
+                  ></button>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="p-4 text-center">
+            <div class="text-body-secondary mb-2">No photos yet.</div>
+            {% if current_user.is_authenticated and current_user.id == user.id %}
+              <div class="small text-body-secondary">Add photos to make your profile stand out.</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Info -->
+  <div class="col-12 col-lg-7">
+    <!-- Header -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+          <div>
+            <h1 class="h3 mb-1">{{ user.display_name }}</h1>
+            <div class="text-body-secondary">
+              <span class="me-2">@{{ user.username }}</span>
+              <span class="badge rounded-pill text-bg-secondary">
+                Joined {{ user.created_at.strftime("%b %d, %Y") }}
+              </span>
+            </div>
+          </div>
+
+          {% if current_user.is_authenticated and current_user.id == user.id %}
+            <div class="d-flex gap-2">
+              {# Adjust endpoints to your app #}
+              <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-sm">
+                Back
+              </a>
+              <a href="{{ url_for('users.update_profile', username=user.username) }}" class="btn btn-primary btn-sm">
+                Edit profile
+              </a>
+            </div>
+          {% else %}
+            <div class="d-flex gap-2">
+              {# Optional: Like/Pass actions if you have routes for them #}
+              <form method="post" action="{{ url_for('main.index') }}">
+                <button class="btn btn-outline-secondary btn-sm" type="submit">Pass</button>
+              </form>
+              <form method="post" action="{{ url_for('main.index') }}">
+                <button class="btn btn-success btn-sm" type="submit">Like</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+
+        <hr class="my-3" />
+
+        <!-- Bio -->
+        <div>
+          <h2 class="h6 text-body-secondary mb-2">Bio</h2>
+          {% if user.bio %}
+            <p class="mb-0" style="white-space: pre-wrap;">{{ user.bio }}</p>
+          {% else %}
+            <p class="mb-0 text-body-secondary">This user hasn’t written a bio yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Hobbies -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="fw-semibold">Hobbies</span>
+        <span class="badge text-bg-secondary">{{ user.hobbies|length }}</span>
+      </div>
+      <div class="card-body">
+        {% if user.hobbies and user.hobbies|length > 0 %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for hobby in user.hobbies | sort(attribute='name') | sort(attribute='category') %}
+              <span class="badge rounded-pill text-bg-info">{{ hobby.name }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-body-secondary">No hobbies listed.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Game stats -->
+    <div class="card shadow-sm">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="fw-semibold">Game stats</span>
+        <span class="badge text-bg-secondary">{{ user.game_stats|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if user.game_stats and user.game_stats|length > 0 %}
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th scope="col">Game</th>
+                  <th scope="col" class="text-end">High score</th>
+                  <th scope="col" class="text-end">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for stat in user.game_stats %}
+                  <tr>
+                    <td class="fw-semibold">
+                      {# assumes Game model has .name; adjust if needed #}
+                      {{ stat.game.name if stat.game else ("Game #" ~ stat.game_id) }}
+                    </td>
+                    <td class="text-end">{{ stat.high_score }}</td>
+                    <td class="text-end text-body-secondary">
+                      {{ stat.updated_at.strftime("%b %d, %Y") }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="p-4 text-body-secondary">No game stats yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
