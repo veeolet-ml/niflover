@@ -128,8 +128,7 @@
       <div class="card-body">
         {% if user.hobbies and user.hobbies|length > 0 %}
           <div class="d-flex flex-wrap gap-2">
-            {% for hobby in user.hobbies %}
-              {# assumes hobby has .name; adjust if your column is different #}
+            {% for hobby in user.hobbies | sort(attribute='name') | sort(attribute='category') %}
               <span class="badge rounded-pill text-bg-info">{{ hobby.name }}</span>
             {% endfor %}
           </div>
