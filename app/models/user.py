@@ -52,6 +52,11 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def add_photo(self, rel_path, position):
+        photo = UserPhoto(path=rel_path, position=position)
+        self.photos.append(photo)
+        return photo
 
 user_hobby = db.Table(
     'user_hobby',

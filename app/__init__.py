@@ -19,6 +19,9 @@ def register_blueprints(app):
     from .blueprints.auth import bp as auth_bp
     app.register_blueprint(auth_bp)
 
+    from .blueprints.users import bp as users_bp
+    app.register_blueprint(users_bp)
+
 
 def register_extensions(app):
     from .extensions import db, login_manager, migrate

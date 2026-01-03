@@ -1,0 +1,225 @@
+{# templates/users/update_profile.html #}
+{% extends "base.html" %}
+
+{% block title %}Update Profile{% endblock %}
+
+{% block content %}
+<div class="row g-4 justify-content-center">
+  <div class="col-12 col-lg-9">
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h1 class="h4 mb-0">Update profile</h1>
+        <div class="text-body-secondary">@{{ user.username }}</div>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('users.profile', username=user.username) }}">
+        Back to profile
+      </a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="card shadow-sm">
+      {{ form.hidden_tag() }}
+
+      <div class="card-body">
+        <!-- Profile info -->
+        <div class="mb-4">
+          <h2 class="h6 text-body-secondary mb-3">Profile info</h2>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              {{ form.display_name.label(class="form-label") }}
+              {{ form.display_name(class="form-control" + (" is-invalid" if form.display_name.errors else "")) }}
+              {% for e in form.display_name.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12 col-md-6">
+              {{ form.username.label(class="form-label") }}
+              {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+              {% for e in form.username.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12">
+              {{ form.email.label(class="form-label") }}
+              {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+              {% for e in form.email.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12">
+              {{ form.bio.label(class="form-label") }}
+              {{ form.bio(class="form-control" + (" is-invalid" if form.bio.errors else ""), rows="4") }}
+              {% for e in form.bio.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+              <div class="form-text">Tell people something about you (optional).</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- Hobbies -->
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h2 class="h6 text-body-secondary mb-0">Hobbies</h2>
+            <span class="badge text-bg-secondary">{{ form.hobbies.data|length if form.hobbies.data else 0 }}</span>
+          </div>
+          <div class="text-body-secondary small mb-2">Select all that apply.</div>
+
+          {% if form.hobbies.errors %}
+            {% for e in form.hobbies.errors %}
+              <div class="text-danger small">{{ e }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <div class="row g-2">
+            {% for value, label in form.hobbies.choices %}
+              {% set checked = value in (form.hobbies.data or []) %}
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="{{ form.hobbies.name }}"
+                    id="hobby-{{ value }}"
+                    value="{{ value }}"
+                    {% if checked %}checked{% endif %}
+                  />
+                  <label class="form-check-label" for="hobby-{{ value }}">{{ label }}</label>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- Password -->
+        <div class="mb-4">
+          <h2 class="h6 text-body-secondary mb-3">Change password</h2>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              {{ form.current_password.label(class="form-label") }}
+              {{ form.current_password(class="form-control" + (" is-invalid" if form.current_password.errors else ""), autocomplete="current-password") }}
+              {% for e in form.current_password.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12 col-md-4">
+              {{ form.new_password.label(class="form-label") }}
+              {{ form.new_password(class="form-control" + (" is-invalid" if form.new_password.errors else ""), autocomplete="new-password") }}
+              {% for e in form.new_password.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-12 col-md-4">
+              {{ form.confirm_new_password.label(class="form-label") }}
+              {{ form.confirm_new_password(class="form-control" + (" is-invalid" if form.confirm_new_password.errors else ""), autocomplete="new-password") }}
+              {% for e in form.confirm_new_password.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="small text-body-secondary mt-2">
+            Leave these blank if you don’t want to change your password.
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- Photos -->
+        <div class="mb-2">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <h2 class="h6 text-body-secondary mb-0">Photos (max 4)</h2>
+            <span class="badge text-bg-secondary">{{ user.photos|length }}</span>
+          </div>
+          <div class="small text-body-secondary mb-3">
+            Slot priority is left-to-right (Photo #1 is the highest priority).
+          </div>
+
+          {% set photos_by_pos = {} %}
+          {% for p in user.photos %}
+            {% set _ = photos_by_pos.update({p.position: p}) %}
+          {% endfor %}
+
+          <div class="row g-3">
+            {% for i in range(4) %}
+              <div class="col-12 col-md-6">
+                <div class="card">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <span class="fw-semibold">Photo #{{ i + 1 }}</span>
+                    <span class="badge text-bg-secondary">position {{ i }}</span>
+                  </div>
+
+                  <div class="card-body">
+                    {% if photos_by_pos.get(i) %}
+                      <img
+                        src="{{ url_for('static', filename=photos_by_pos.get(i).path) }}"
+                        class="img-fluid rounded mb-3"
+                        style="aspect-ratio: 4 / 5; object-fit: cover; width: 100%;"
+                        alt="Photo {{ i + 1 }}"
+                        loading="lazy"
+                      />
+                    {% else %}
+                      <div class="text-body-secondary mb-3">No photo in this slot.</div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                      {% if i == 0 %}
+                        {{ form.photo0(class="form-control" + (" is-invalid" if form.photo0.errors else "")) }}
+                        {% for e in form.photo0.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+                      {% elif i == 1 %}
+                        {{ form.photo1(class="form-control" + (" is-invalid" if form.photo1.errors else "")) }}
+                        {% for e in form.photo1.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+                      {% elif i == 2 %}
+                        {{ form.photo2(class="form-control" + (" is-invalid" if form.photo2.errors else "")) }}
+                        {% for e in form.photo2.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+                      {% elif i == 3 %}
+                        {{ form.photo3(class="form-control" + (" is-invalid" if form.photo3.errors else "")) }}
+                        {% for e in form.photo3.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+                      {% endif %}
+                      <div class="form-text">Uploading replaces the existing photo in this slot.</div>
+                    </div>
+
+                    <div class="form-check">
+                      {% if i == 0 %}
+                        {{ form.delete0(class="form-check-input", id="delete0") }}
+                      {% elif i == 1 %}
+                        {{ form.delete1(class="form-check-input", id="delete1") }}
+                      {% elif i == 2 %}
+                        {{ form.delete2(class="form-check-input", id="delete2") }}
+                      {% elif i == 3 %}
+                        {{ form.delete3(class="form-check-input", id="delete3") }}
+                      {% endif %}
+                      <label class="form-check-label" for="delete{{ i }}">Delete this slot</label>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('users.profile', username=user.username) }}">
+          Cancel
+        </a>
+        {{ form.submit(class="btn btn-primary") }}
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
