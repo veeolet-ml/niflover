@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}nifLover{% endblock %}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      defer
+    ></script>
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <!-- Brand -->
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">
+          nifLover
+        </a>
+
+        <!-- Mobile toggle -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarContent"
+          aria-controls="navbarContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Collapsible content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <!-- LEFT NAV -->
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                href="{{ url_for('main.index') }}"
+                class="nav-link"
+              >
+                Home
+              </a>
+            </li>
+          </ul>
+
+          <!-- RIGHT NAV (AUTH) -->
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+            {% if current_user.is_authenticated %}
+              <li class="nav-item">
+                <a href="{{ url_for('users.profile', username=current_user.username) }}" class="nav-link">
+                  {{ current_user.display_name }}
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  href="{{ url_for('auth.logout') }}"
+                  class="nav-link"
+                >
+                  Logout
+                </a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a
+                  href="{{ url_for('auth.login') }}"
+                  class="nav-link"
+                >
+                  Login
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  href="{{ url_for('auth.register') }}"
+                  class="nav-link"
+                >
+                  Register
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- PAGE CONTENT -->
+    <main class="container mt-4">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
