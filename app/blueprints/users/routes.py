@@ -27,7 +27,7 @@ def update_profile(username):
 
     form = UpdateProfileForm()
 
-    all_hobbies = Hobby.query.order_by(Hobby.name.asc()).all()
+    all_hobbies = Hobby.query.order_by(Hobby.category.asc(), Hobby.name.asc()).all()
     form.hobbies.choices = [(h.id, h.name) for h in all_hobbies]
 
     if request.method == 'GET':
@@ -61,26 +61,22 @@ def update_profile(username):
         for pos, photo_field, delete_field in slot_fields[:max_photos]:
             photo = get_photo_by_position(user, pos)
 
-            # Delete takes priority
             if delete_field.data:
                 if photo:
                     delete_photo_file(photo.path)
                     db.session.delete(photo)
                 continue
 
-            # Replace / add
             if photo_field.data:
                 old_path = photo.path if photo else None
 
-                # Save new first (safer)
                 rel_path = save_photo_file(photo_field.data, user.username)
 
                 if not photo:
-                    user.add_photo(rel_path, pos)   # should create UserPhoto(path=..., position=...)
+                    user.add_photo(rel_path, pos)
                 else:
                     photo.path = rel_path
 
-                # Now delete old file
                 if old_path:
                     delete_photo_file(old_path)
 

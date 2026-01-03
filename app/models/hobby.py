@@ -6,6 +6,7 @@ class Hobby(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     name = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    category = db.Column(db.String(100), nullable=False)
 
     users = db.relationship(
         'User',
@@ -15,5 +16,5 @@ class Hobby(db.Model):
     )
 
     def __repr__(self):
-        return f"<Hobby {self.name!r}>"
+        return f"<Hobby {self.name!r}, Category: {self.category!r}>"
     
