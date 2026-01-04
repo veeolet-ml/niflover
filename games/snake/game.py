@@ -29,7 +29,8 @@ class GameState(Enum):
 
 class SnakeGame:
 
-    def __init__(self, food_items: int) -> None:
+    def __init__(self, food_items: int, server_address: str = "localhost:8080") -> None:
+        self.server_address = server_address
         self.events = None
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -173,9 +174,9 @@ class SnakeGame:
 
     def submit_results(self) -> None:
         """TODO: add POST request to submit results when database api is finished"""
+        print(f"Submitting to server: {self.server_address}")
         print(f"Username: {self.username_visualiser.manager.value}")
         print(f"High score: {self.score_manager.high_score}")
-        pass
 
 
 
