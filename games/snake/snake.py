@@ -22,13 +22,13 @@ sfx = [pygame.mixer.Sound('sounds/pickup_1.wav'),
 def play_random_sound() -> None:
     random.choice(sfx).play()
 
-def _add_pair(a, b):
+def _add_pair(a: tuple[int, int], b: tuple[int, int]) -> tuple[int, int]:
     (x, y) = a
     (z, t) = b
     return x + z, y + t
 
 
-def _convert_direction(direction):
+def _convert_direction(direction: str):
     if direction == "UP":
         return -1, 0
     elif direction == "DOWN":
