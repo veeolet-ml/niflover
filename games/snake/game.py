@@ -25,12 +25,11 @@ class GameState(Enum):
     GAME_RUNNING = 1
     GAME_OVER = 2
     INPUT_USERNAME = 3
-    INPUT_PASSWORD = 4
 
 
 class SnakeGame:
 
-    def __init__(self) -> None:
+    def __init__(self, food_items: int) -> None:
         self.events = None
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -42,7 +41,7 @@ class SnakeGame:
         rand_row = random.randint(5, self.grid.blocks_per_height - 5)
         self.snake = Snake(rand_row, rand_col, self.grid)
         self.grid.register_entity(self.snake)
-        self.food_manager = FoodManager(1)
+        self.food_manager = FoodManager(food_items)
         self.grid.register_entity(self.food_manager)
         self.score_manager = ScoreManager(self.snake)
         self.delta = 0
@@ -110,8 +109,6 @@ class SnakeGame:
                     self.game_over()
                 case GameState.INPUT_USERNAME:
                     self.input_username()
-                case GameState.INPUT_PASSWORD:
-                    self.input_password()
 
             self._post_frame_display()
 
@@ -164,32 +161,18 @@ class SnakeGame:
         for event in self.events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    self.game_state = GameState.INPUT_PASSWORD
-                if event.key == pygame.K_TAB:
                     self.game_state = GameState.GAME_OVER
+                    self.submit_results()
         self.username_visualiser.update(self.events)
         input_rect = self.username_visualiser.surface.get_rect(
             center=(self.screen.get_width() // 2, self.screen.get_height() // 2)
         )
         self.screen.blit(self.username_visualiser.surface, input_rect)
 
-    def input_password(self) -> None:
-        self.hud.draw_input_password()
-        for event in self.events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    self.submit_results()
-                    self.game_state = GameState.GAME_OVER
-                if event.key == pygame.K_TAB:
-                    self.game_state = GameState.INPUT_USERNAME
-        self.password_visualiser.update(self.events)
-        input_rect = self.password_visualiser.surface.get_rect(
-            center=(self.screen.get_width() // 2, self.screen.get_height() // 2)
-        )
-        self.screen.blit(self.password_visualiser.surface, input_rect)
 
     def submit_results(self):
         """TODO: add POST request to submit results when database api is finished"""
+        print(f"Username: {self.username_visualiser.manager.value}")
         print(f"High score: {self.score_manager.high_score}")
         pass
 
