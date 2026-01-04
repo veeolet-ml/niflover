@@ -1,136 +1,10 @@
 import pygame
 import sys
+from constants import *
+from blocks import *
+from grid import *
 
 pygame.init()
-
-# Constants
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
-GRID_SIZE = 8  # 8x8 grid
-CELL_SIZE = 50
-GRID_OFFSET_X = 150
-GRID_OFFSET_Y = 100
-
-BLOCK_OFFSET_X = 600
-BLOCK_OFFSET_Y = 100
-
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (128, 128, 128)
-LIGHT_GRAY = (200, 200, 200)
-BLUE = (100, 149, 237)
-DARK_BLUE = (65, 105, 225)
-
-
-class Block:
-    def __init__(self, cell_size, offset_x, offset_y):
-        self.cellnum = 0
-        self.cells = []
-        self.cell_size = cell_size
-        self.offset_x = offset_x
-        self.offset_y = offset_y
-        self.rect = pygame.Rect(offset_x, offset_y, cell_size * 3, cell_size * 3)
-
-    def draw(self, screen):
-        for [x_poz, y_poz] in self.cells:
-            x = x_poz * self.cell_size + self.offset_x
-            y = y_poz * self.cell_size + self.offset_y
-            pygame.draw.rect(screen, BLUE,
-                         (x, y, self.cell_size, self.cell_size))
-            pygame.draw.rect(screen, GRAY,
-                             (x, y, self.cell_size, self.cell_size), 2)
-
-class SmallSquare(Block):
-    def __init__(self, cell_size, offset_x, offset_y):
-        Block.__init__(self, cell_size, offset_x, offset_y)
-        self.cellnum = 4
-        self.cells = [[0, 0],[0, 1],[1, 0],[1, 1]]
-
-class Grid:
-    def __init__(self, size, cell_size, offset_x, offset_y):
-        self.size = size
-        self.cell_size = cell_size
-        self.offset_x = offset_x
-        self.offset_y = offset_y
-        # 0 = empty, 1 = filled
-        self.cells = [[0 for _ in range(size)] for _ in range(size)]
-
-    def draw(self, screen):
-        for row in range(self.size):
-            for col in range(self.size):
-                x = self.offset_x + col * self.cell_size
-                y = self.offset_y + row * self.cell_size
-
-                if self.cells[row][col] == 0:
-                    pygame.draw.rect(screen, LIGHT_GRAY,
-                                     (x, y, self.cell_size, self.cell_size))
-                if self.cells[row][col] == 1:
-                    pygame.draw.rect(screen, DARK_BLUE,
-                                     (x, y, self.cell_size, self.cell_size))
-                if self.cells[row][col] == 2:
-                    pygame.draw.rect(screen, BLUE,
-                                     (x, y, self.cell_size, self.cell_size))
-                pygame.draw.rect(screen, GRAY,
-                                 (x, y, self.cell_size, self.cell_size), 2)
-
-    def is_valid_position(self, row, col):
-        return 0 <= row < self.size and 0 <= col < self.size
-
-    def is_cell_empty(self, row, col):
-        if not self.is_valid_position(row, col):
-            return False
-        return self.cells[row][col] == 0
-
-    def place_cell(self, row, col):
-        if self.is_valid_position(row, col):
-            self.cells[row][col] = 1
-
-    def hover_cell(self, row, col):
-        if self.is_valid_position(row, col):
-            self.cells[row][col] = 2
-
-    def clear_cell(self, row, col):
-        if self.is_valid_position(row, col):
-            self.cells[row][col] = 0
-
-    def check_and_clear_lines(self):
-        cleared_lines = 0
-
-        # Check rows
-        rows_to_clear = []
-        for row in range(self.size):
-            if all(self.cells[row][col] == 1 for col in range(self.size)):
-                rows_to_clear.append(row)
-
-        # Check columns
-        cols_to_clear = []
-        for col in range(self.size):
-            if all(self.cells[row][col] == 1 for row in range(self.size)):
-                cols_to_clear.append(col)
-
-        # Clear rows
-        for row in rows_to_clear:
-            for col in range(self.size):
-                self.cells[row][col] = 0
-            cleared_lines += 1
-
-        # Clear columns
-        for col in cols_to_clear:
-            for row in range(self.size):
-                self.cells[row][col] = 0
-            cleared_lines += 1
-
-        return cleared_lines
-
-    def get_cell_from_pos(self, mouse_x, mouse_y):
-        """Convert mouse position to grid cell coordinates"""
-        if (self.offset_x <= mouse_x <= self.offset_x + self.size * self.cell_size and
-                self.offset_y <= mouse_y <= self.offset_y + self.size * self.cell_size):
-            col = (mouse_x - self.offset_x) // self.cell_size
-            row = (mouse_y - self.offset_y) // self.cell_size
-            return row, col
-        return None, None
 
 
 class Game:
@@ -142,9 +16,25 @@ class Game:
         self.grid = Grid(GRID_SIZE, CELL_SIZE, GRID_OFFSET_X, GRID_OFFSET_Y)
         self.score = 0
         self.font = pygame.font.Font(None, 36)
+        self.big_font = pygame.font.Font(None, 72)
+        self.generator = BlockGenerator(CELL_SIZE, BLOCK_OFFSET_X)
         self.blocks = []
-        self.blocks.append(SmallSquare(CELL_SIZE, BLOCK_OFFSET_X, BLOCK_OFFSET_Y))
+        self.blocks.append(self.generator.generate(BLOCK_OFFSET_Y))
+        self.blocks.append(self.generator.generate(BLOCK_OFFSET2_Y))
+        self.blocks.append(self.generator.generate(BLOCK_OFFSET3_Y))
+
         self.selected = 0
+        self.game_over = False
+
+        # Finish Session button
+        self.finish_button = pygame.Rect(WINDOW_WIDTH - 200, 20, 180, 50)
+
+    def check_game_over(self):
+        """Check if any block can be placed on the grid"""
+        for block in self.blocks:
+            if block.can_be_placed(self.grid):
+                return False
+        return True
 
     def handle_events(self):
         """Handle pygame events"""
@@ -152,16 +42,31 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
-            # For testing: click to toggle cells
+            # If game over, check for restart
+            if self.game_over:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        # Restart game
+                        self.__init__()
+                    elif event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
+                        self.running = False
+                continue
+
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Check if finish button was clicked
+                if self.finish_button.collidepoint(mouse_x, mouse_y):
+                    self.game_over = True
+                    continue
+
                 row, col = self.grid.get_cell_from_pos(mouse_x, mouse_y)
                 if self.selected != 0:
                     block = self.blocks[self.selected - 1]
                     nr = 0
                     for [x_poz, y_poz] in block.cells:
                         row, col = self.grid.get_cell_from_pos(mouse_x + x_poz * CELL_SIZE, mouse_y + y_poz * CELL_SIZE)
-                        if row is not None and col is not None and self.grid.is_valid_position(row, col) and self.grid.cells[row][col] == 2:
+                        if row is not None and col is not None and self.grid.is_valid_position(row, col) and \
+                                self.grid.cells[row][col] == 2:
                             nr = nr + 1
                     if nr == block.cellnum:
                         for [x_poz, y_poz] in block.cells:
@@ -169,9 +74,23 @@ class Game:
                                                                    mouse_y + y_poz * CELL_SIZE)
                             if row is not None and col is not None:
                                 self.grid.place_cell(row, col)
+
+                        # Generate new block
+                        if (self.selected == 1):
+                            self.blocks[self.selected - 1] = self.generator.generate(BLOCK_OFFSET_Y)
+                        if (self.selected == 2):
+                            self.blocks[self.selected - 1] = self.generator.generate(BLOCK_OFFSET2_Y)
+                        if (self.selected == 3):
+                            self.blocks[self.selected - 1] = self.generator.generate(BLOCK_OFFSET3_Y)
+
                         self.selected = 0
+
                 if BLOCK_OFFSET_X <= mouse_x <= BLOCK_OFFSET_X + CELL_SIZE * 3 and BLOCK_OFFSET_Y <= mouse_y <= BLOCK_OFFSET_Y + CELL_SIZE * 3:
                     self.selected = 1
+                if BLOCK_OFFSET_X <= mouse_x <= BLOCK_OFFSET_X + CELL_SIZE * 3 and BLOCK_OFFSET2_Y <= mouse_y <= BLOCK_OFFSET2_Y + CELL_SIZE * 3:
+                    self.selected = 2
+                if BLOCK_OFFSET_X <= mouse_x <= BLOCK_OFFSET_X + CELL_SIZE * 3 and BLOCK_OFFSET3_Y <= mouse_y <= BLOCK_OFFSET3_Y + CELL_SIZE * 3:
+                    self.selected = 3
 
             for row in range(self.grid.size):
                 for col in range(self.grid.size):
@@ -181,12 +100,13 @@ class Game:
                         nr = 0
                         for [x_poz, y_poz] in block.cells:
                             row_hov, col_hov = self.grid.get_cell_from_pos(mouse_x + x_poz * CELL_SIZE,
-                                                                   mouse_y + y_poz * CELL_SIZE)
-                            if row_hov is not None and col_hov is not None and self.grid.is_valid_position(row, col) and self.grid.cells[row][col] == 0:
+                                                                           mouse_y + y_poz * CELL_SIZE)
+                            if row_hov is not None and col_hov is not None and self.grid.is_valid_position(row, col) and \
+                                    self.grid.cells[row][col] == 0:
                                 nr = nr + 1
                         for [x_poz, y_poz] in block.cells:
                             row_hov, col_hov = self.grid.get_cell_from_pos(mouse_x + x_poz * CELL_SIZE,
-                                                                   mouse_y + y_poz * CELL_SIZE)
+                                                                           mouse_y + y_poz * CELL_SIZE)
                             if row_hov == row and col_hov == col:
                                 ok = 1
                         if nr < block.cellnum:
@@ -199,14 +119,73 @@ class Game:
                 nr = 0
                 for [x_poz, y_poz] in block.cells:
                     row, col = self.grid.get_cell_from_pos(mouse_x + x_poz * CELL_SIZE, mouse_y + y_poz * CELL_SIZE)
-                    if row is not None and col is not None and self.grid.is_valid_position(row, col) and self.grid.cells[row][col] == 0:
+                    if row is not None and col is not None and self.grid.is_valid_position(row, col) and \
+                            self.grid.cells[row][col] == 0:
                         nr = nr + 1
                 if nr == block.cellnum:
-                    print(nr)
                     for [x_poz, y_poz] in block.cells:
                         row, col = self.grid.get_cell_from_pos(mouse_x + x_poz * CELL_SIZE, mouse_y + y_poz * CELL_SIZE)
                         if row is not None and col is not None:
                             self.grid.hover_cell(row, col)
+
+            rows_to_clear = []
+            cols_to_clear = []
+            for row in range(self.grid.size):
+                nr = 0
+                for col in range(self.grid.size):
+                    if self.grid.cells[row][col] == 1:
+                        nr = nr + 1
+                if nr == GRID_SIZE:
+                    rows_to_clear.append(row)
+            for col in range(self.grid.size):
+                nr = 0
+                for row in range(self.grid.size):
+                    if self.grid.cells[row][col] == 1:
+                        nr = nr + 1
+                if nr == GRID_SIZE:
+                    cols_to_clear.append(col)
+            nr_rows = 0
+            nr_cols = 0
+            for row in rows_to_clear:
+                for col in range(self.grid.size):
+                    self.grid.clear_cell(row, col)
+                nr_rows = nr_rows + 1
+            for col in cols_to_clear:
+                for row in range(self.grid.size):
+                    self.grid.clear_cell(row, col)
+                nr_cols = nr_cols + 1
+            if nr_rows != 0 or nr_cols != 0:
+                self.score += 2 ** nr_rows * 2 ** nr_cols * 100
+            if self.check_game_over():
+                self.game_over = True
+
+    def draw_game_over(self):
+        """Draw the game over screen"""
+        # Semi-transparent overlay
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        overlay.set_alpha(200)
+        overlay.fill(BLACK)
+        self.screen.blit(overlay, (0, 0))
+
+        # Game Over text
+        game_over_text = self.big_font.render("GAME OVER", True, RED)
+        game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
+        self.screen.blit(game_over_text, game_over_rect)
+
+        # Final Score
+        score_text = self.font.render(f"Final Score: {self.score}", True, WHITE)
+        score_rect = score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        self.screen.blit(score_text, score_rect)
+
+        # Instructions
+        restart_text = self.font.render("Press R to Restart", True, WHITE)
+        restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80))
+        self.screen.blit(restart_text, restart_rect)
+
+        quit_text = self.font.render("Press ESC to Quit", True, WHITE)
+        quit_rect = quit_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 130))
+        self.screen.blit(quit_text, quit_rect)
+
     def draw(self):
         """Draw everything"""
         self.screen.fill(WHITE)
@@ -222,10 +201,25 @@ class Game:
         score_text = self.font.render(f"Score: {self.score}", True, BLACK)
         self.screen.blit(score_text, (20, 20))
 
+        # Draw Finish Session button
+        mouse_pos = pygame.mouse.get_pos()
+        button_color = RED if self.finish_button.collidepoint(mouse_pos) else DARK_BLUE
+        pygame.draw.rect(self.screen, button_color, self.finish_button, border_radius=10)
+        pygame.draw.rect(self.screen, BLACK, self.finish_button, 3, border_radius=10)
+
+        button_font = pygame.font.Font(None, 28)
+        button_text = button_font.render("Finish Session", True, WHITE)
+        button_text_rect = button_text.get_rect(center=self.finish_button.center)
+        self.screen.blit(button_text, button_text_rect)
+
         # Draw instructions
         instruction_font = pygame.font.Font(None, 24)
-        instruction_text = instruction_font.render("Click cells to toggle (testing mode)", True, GRAY)
+        instruction_text = instruction_font.render("Click and place blocks", True, GRAY)
         self.screen.blit(instruction_text, (20, WINDOW_HEIGHT - 40))
+
+        # Draw game over screen if game is over
+        if self.game_over:
+            self.draw_game_over()
 
         pygame.display.flip()
 
@@ -237,6 +231,7 @@ class Game:
 
         pygame.quit()
         sys.exit()
+
 
 if __name__ == "__main__":
     game = Game()
