@@ -1,4 +1,3 @@
-import pygame
 from pygame.display import update
 
 from snake import Snake

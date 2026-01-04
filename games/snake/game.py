@@ -66,7 +66,8 @@ class SnakeGame:
         rand_row = random.randint(5, self.grid.blocks_per_height - 5)
         self.snake = Snake(rand_row, rand_col, self.grid)
         self.grid.register_entity(self.snake)
-        self.food_manager = FoodManager(1)
+        food_items = self.food_manager.max_food_items
+        self.food_manager = FoodManager(food_items)
         self.grid.register_entity(self.food_manager)
         high_score = self.score_manager.high_score
         self.score_manager = ScoreManager(self.snake, high_score=high_score)
@@ -170,7 +171,7 @@ class SnakeGame:
         self.screen.blit(self.username_visualiser.surface, input_rect)
 
 
-    def submit_results(self):
+    def submit_results(self) -> None:
         """TODO: add POST request to submit results when database api is finished"""
         print(f"Username: {self.username_visualiser.manager.value}")
         print(f"High score: {self.score_manager.high_score}")
