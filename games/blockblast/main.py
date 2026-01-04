@@ -30,14 +30,12 @@ class Game:
         self.finish_button = pygame.Rect(WINDOW_WIDTH - 200, 20, 180, 50)
 
     def check_game_over(self):
-        """Check if any block can be placed on the grid"""
         for block in self.blocks:
             if block.can_be_placed(self.grid):
                 return False
         return True
 
     def handle_events(self):
-        """Handle pygame events"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -54,7 +52,6 @@ class Game:
 
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Check if finish button was clicked
                 if self.finish_button.collidepoint(mouse_x, mouse_y):
                     self.game_over = True
                     continue
@@ -160,24 +157,19 @@ class Game:
                 self.game_over = True
 
     def draw_game_over(self):
-        """Draw the game over screen"""
-        # Semi-transparent overlay
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         overlay.set_alpha(200)
         overlay.fill(BLACK)
         self.screen.blit(overlay, (0, 0))
 
-        # Game Over text
         game_over_text = self.big_font.render("GAME OVER", True, RED)
         game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
         self.screen.blit(game_over_text, game_over_rect)
 
-        # Final Score
         score_text = self.font.render(f"Final Score: {self.score}", True, WHITE)
         score_rect = score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         self.screen.blit(score_text, score_rect)
 
-        # Instructions
         restart_text = self.font.render("Press R to Restart", True, WHITE)
         restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80))
         self.screen.blit(restart_text, restart_rect)
@@ -187,21 +179,16 @@ class Game:
         self.screen.blit(quit_text, quit_rect)
 
     def draw(self):
-        """Draw everything"""
         self.screen.fill(WHITE)
 
-        # Draw grid
         self.grid.draw(self.screen)
 
-        # Draw block
         for block in self.blocks:
             block.draw(self.screen)
 
-        # Draw score
         score_text = self.font.render(f"Score: {self.score}", True, BLACK)
         self.screen.blit(score_text, (20, 20))
 
-        # Draw Finish Session button
         mouse_pos = pygame.mouse.get_pos()
         button_color = RED if self.finish_button.collidepoint(mouse_pos) else DARK_BLUE
         pygame.draw.rect(self.screen, button_color, self.finish_button, border_radius=10)
@@ -212,12 +199,10 @@ class Game:
         button_text_rect = button_text.get_rect(center=self.finish_button.center)
         self.screen.blit(button_text, button_text_rect)
 
-        # Draw instructions
         instruction_font = pygame.font.Font(None, 24)
         instruction_text = instruction_font.render("Click and place blocks", True, GRAY)
         self.screen.blit(instruction_text, (20, WINDOW_HEIGHT - 40))
 
-        # Draw game over screen if game is over
         if self.game_over:
             self.draw_game_over()
 
