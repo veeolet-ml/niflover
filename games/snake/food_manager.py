@@ -1,6 +1,6 @@
 import random
 
-from games.snake.snake_grid import GridEntity, SnakeGrid, CellType
+from snake_grid import GridEntity, SnakeGrid, CellType
 
 
 def _count_food(grid: SnakeGrid) -> int:
@@ -27,7 +27,8 @@ def _add_food(to_add: int, grid: SnakeGrid) -> int:
 
 class FoodManager(GridEntity):
 
-    def __init__(self, max_food_items):
+    def __init__(self, max_food_items: int):
+        self.original_food_items = max_food_items
         self.max_food_items = max_food_items
 
     def update(self, grid: SnakeGrid) -> bool:

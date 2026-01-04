@@ -4,7 +4,7 @@ from typing import Sequence
 
 import pygame
 
-from games.snake.score_manager import ScoreManager
+from score_manager import ScoreManager
 
 
 def _render_wrapped_text(text: str, font: pygame.font.Font, color: pygame.Color | Sequence[int] | int | str,
@@ -84,7 +84,7 @@ class HUD:
         self._create_surfaces((255, 255, 255))
 
 
-    def _get_fading_color(self) -> tuple:
+    def _get_fading_color(self) -> tuple[int, int, int]:
         """Calculate the current color based on time using sine waves for smooth transitions."""
         r = int(self.COLOR_MIN + (self.COLOR_MAX - self.COLOR_MIN) * 
                 (0.5 + 0.5 * math.sin(self.color_time + 1)))
@@ -92,7 +92,7 @@ class HUD:
                 (0.5 + 0.5 * math.sin(self.color_time * 1.1 + 2)))
         b = int(self.COLOR_MIN + (self.COLOR_MAX - self.COLOR_MIN) * 
                 (0.5 + 0.5 * math.sin(self.color_time * 1.2 + 3)))
-        return (r, g, b)
+        return r, g, b
 
     def update(self, dt: int) -> None:
         """Update the color fade - dt is in milliseconds."""

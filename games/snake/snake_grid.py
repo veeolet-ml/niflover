@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import overload
+from typing import overload, Sequence
 
 import pygame
 
@@ -27,10 +27,10 @@ class SnakeGrid:
     """ The grid in which the snake is drawn
 
     Attributes:
-        width: int The width of the grid
-        height: int The height of the grid
-        blocks_per_width: int The blocks per width of the grid
-        blocks_per_height: int The blocks per height of the grid
+        width: The width of the grid in pixels
+        height: The height of the grid in pixels
+        blocks_per_width: The number of blocks per width of the grid
+        blocks_per_height: The number of blocks per height of the grid
         grid: list[list[CellType]] The grid state
         entities: list[GridEntity] The entities in the grid that act on it (i.e. visitors)
     """
@@ -60,7 +60,7 @@ class SnakeGrid:
                 pygame.draw.rect(screen, GRID_EDGE, rect, 1)
 
     def draw_square(self, screen: pygame.Surface, row: int, col: int,
-                    color: pygame.Color | pygame.typing.SequenceLike[int] | int | str) -> None:
+                    color: pygame.Color | Sequence[int] | int | str) -> None:
         rect = pygame.Rect(col * self.get_block_width(),
                            row * self.get_block_height(),
                            self.get_block_width(),
