@@ -66,7 +66,7 @@ class SnakeGame:
         rand_row = random.randint(5, self.grid.blocks_per_height - 5)
         self.snake = Snake(rand_row, rand_col, self.grid)
         self.grid.register_entity(self.snake)
-        food_items = self.food_manager.max_food_items
+        food_items = self.food_manager.original_food_items
         self.food_manager = FoodManager(food_items)
         self.grid.register_entity(self.food_manager)
         high_score = self.score_manager.high_score

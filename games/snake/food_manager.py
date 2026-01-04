@@ -28,6 +28,7 @@ def _add_food(to_add: int, grid: SnakeGrid) -> int:
 class FoodManager(GridEntity):
 
     def __init__(self, max_food_items: int):
+        self.original_food_items = max_food_items
         self.max_food_items = max_food_items
 
     def update(self, grid: SnakeGrid) -> bool:
