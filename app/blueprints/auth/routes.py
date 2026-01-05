@@ -14,6 +14,10 @@ def login():
 
     if login_form.validate_on_submit():
         user = User.query.filter_by(username=login_form.username.data).first()
+        if user is None:
+            login_form.username.errors.append('Invalid username or password.')
+            return render_template('auth/login.html', form=login_form)
+
         if user.check_password(login_form.password.data):
             login_user(user)
             return redirect(url_for('main.index'))
