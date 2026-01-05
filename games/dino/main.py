@@ -1,5 +1,6 @@
 import pygame
 import random
+import requests
 from dinosaur import Dinosaur
 from constants import *
 
@@ -194,6 +195,16 @@ def menu(deathcount):
             score = font.render("Your Score: " + str(points), True, (0, 0, 0))
             scoreRect = score.get_rect()
             scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
+
+            url = 'http://localhost:5000/game/submit_score'
+            payload = {
+                'score': points,
+                'slug': 'dino',
+                'username': 'gigelinho'
+            }
+
+            requests.post(url, json=payload)
+
             SCREEN.blit(score, scoreRect)
         textRect = text.get_rect()
         textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
