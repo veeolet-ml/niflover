@@ -20,8 +20,7 @@ class Dinosaur:
         self.dino_rect.x = self.X_POS
         self.dino_rect.y = self.Y_POS
         self.jump_vel = self.JUMP_VEL
-        self.dino_rect = self.dino_rect.inflate(-30, -30)
-
+        self.dino_rect = pygame.Rect(self.dino_rect.x, self.dino_rect.y, 5, 20)
     def update(self, userInput):
         if self.dino_duck:
             self.duck()
