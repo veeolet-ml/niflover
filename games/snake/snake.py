@@ -18,6 +18,8 @@ os.chdir(parent)
 pygame.mixer.init()
 sfx = [pygame.mixer.Sound('sounds/pickup_1.wav'),
       pygame.mixer.Sound('sounds/pickup_2.wav')]
+sfx[0].set_volume(0.05)
+sfx[1].set_volume(0.05)
 
 def play_random_sound() -> None:
     random.choice(sfx).play()
