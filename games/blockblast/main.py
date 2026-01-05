@@ -1,5 +1,6 @@
 import pygame
 import sys
+import requests
 from constants import *
 from blocks import *
 from grid import *
@@ -214,6 +215,14 @@ class Game:
             self.draw()
             self.clock.tick(60)
 
+        url = 'http://localhost:5000/game/submit_score'
+        payload = {
+            'score': self.score,
+            'slug': 'blockblast',
+            'username': 'gigelinho'
+        }
+
+        requests.post(url, json=payload)
         pygame.quit()
         sys.exit()
 
