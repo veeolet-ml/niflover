@@ -11,6 +11,7 @@ class Obstacle:
         self.image = image
         self.type = type
         self.rect = self.image[self.type].get_rect()
+        self.rect = pygame.Rect(self.rect.x, self.rect.y, 5, 20)
         self.rect.x = SCREEN_WIDTH
 
     def update(self):
@@ -149,8 +150,7 @@ def main():
             obstacle.draw(SCREEN)
             obstacle.update()
             if player.dino_rect.colliderect(obstacle.rect):
-                pygame.time.delay(2000)
-                return True  # CHANGED: Return True to restart
+                return True
 
         for projectile in projectiles[:]:
             projectile.update()
@@ -183,6 +183,7 @@ def main():
 
 def menu(deathcount):
     global points
+    global highscore
     run = True
     while run:
         SCREEN.fill((255, 255, 255))
@@ -194,11 +195,15 @@ def menu(deathcount):
             text = font.render("Press any key to restart", True, (0, 0, 0))
             score = font.render("Your Score: " + str(points), True, (0, 0, 0))
             scoreRect = score.get_rect()
+            highscoreText = font.render("Your HighScore: " + str(highscore), True, (0, 0, 0))
+            highscoreRect = highscoreText.get_rect()
             scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
-
+            highscoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
+            if points > highscore:
+                highscore = points
             url = 'http://localhost:5000/game/submit_score'
             payload = {
-                'score': points,
+                'score': highscore,
                 'slug': 'dino',
                 'username': 'gigelinho'
             }
@@ -206,6 +211,7 @@ def menu(deathcount):
             requests.post(url, json=payload)
 
             SCREEN.blit(score, scoreRect)
+            SCREEN.blit(highscoreText, highscoreRect)
         textRect = text.get_rect()
         textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         SCREEN.blit(text, textRect)
@@ -221,6 +227,7 @@ def menu(deathcount):
                 return True
     return False
 
+highscore = 0
 deathcount = 0
 while True:
     if menu(deathcount):
