@@ -157,8 +157,7 @@
                 {% for stat in user.game_stats %}
                   <tr>
                     <td class="fw-semibold">
-                      {# assumes Game model has .name; adjust if needed #}
-                      {{ stat.game.name if stat.game else ("Game #" ~ stat.game_id) }}
+                      {{ stat.game.title if stat.game else ("Game #" ~ stat.game_id) }}
                     </td>
                     <td class="text-end">{{ stat.high_score }}</td>
                     <td class="text-end text-body-secondary">
