@@ -1,8 +1,35 @@
+from math import log
+
 from sqlalchemy import select
 from app.extensions import db
 from app.models import UserAction, User, Match
 from flask_login import current_user
 from flask import session
+
+
+def scalar_product(user1, user2) -> float:
+    score = 0
+    for hobby in user1.hobbies:
+        for hobby2 in user2.hobbies:
+            if hobby.name == hobby2.name:
+                score += 1
+            elif hobby.category == hobby2.category:
+                score += 0.5
+    for game in user1.game_stats:
+        for game2 in user2.game_stats:
+            if game.game.slug == game2.game.slug:
+                if game.game.slug == 'snake':
+                    score += 1
+                    score -= abs(game2.score - game.score) / 400
+                if game.game.slug == 'block_blast':
+                    score += 1
+                    score -= abs(log(game2.score, 10) - log(game.score, 10))
+                if game.game.slug == 'dino':
+                    score += 1
+                    score -= abs(log(game2.score, 10) - log(game.score, 10))
+
+    return score
+
 
 def feed_ids():
     acted_user_ids = select(UserAction.target_id).where(
@@ -18,8 +45,9 @@ def feed_ids():
     )
 
     # TODO: sort based on matchmaking algorithm
-
+    candidates.sort(key=lambda user: -scalar_product(user, current_user))
     return [user.id for user in candidates]
+
 
 def pop_next_feed_id():
     ids = session.get('feed_ids', [])
