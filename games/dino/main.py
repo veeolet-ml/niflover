@@ -6,12 +6,13 @@ from constants import *
 
 pygame.init()
 
+
 class Obstacle:
     def __init__(self, image, type):
         self.image = image
         self.type = type
         self.rect = self.image[self.type].get_rect()
-        self.rect = pygame.Rect(self.rect.x, self.rect.y, 5, 20)
+        self.rect = pygame.Rect(self.rect.x, self.rect.y, 30, 30)
         self.rect.x = SCREEN_WIDTH
 
     def update(self):
@@ -22,17 +23,20 @@ class Obstacle:
     def draw(self, SCREEN):
         SCREEN.blit(self.image[self.type], self.rect)
 
+
 class SmallCactus(Obstacle):
     def __init__(self, image):
-        self.type = random.randint(0,2)
+        self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 325
+
 
 class LargeCactus(Obstacle):
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 300
+
 
 class Bird(Obstacle):
     def __init__(self, image):
@@ -46,8 +50,9 @@ class Bird(Obstacle):
     def draw(self, SCREEN):
         if self.index >= 9:
             self.index = 0
-        SCREEN.blit(self.image[self.index//5], self.rect)
+        SCREEN.blit(self.image[self.index // 5], self.rect)
         self.index += 1
+
 
 class Cloud:
     def __init__(self):
@@ -65,8 +70,10 @@ class Cloud:
     def draw(self, SCREEN):
         SCREEN.blit(self.image, (self.x, self.y))
 
+
 class Projectile:
     PROJECTILE_VEL = 5
+
     def __init__(self, player):
         self.x = player.dino_rect.x + 35
         self.y = player.dino_rect.y
@@ -82,6 +89,7 @@ class Projectile:
 
     def draw(self, SCREEN):
         SCREEN.blit(self.image, (self.x, self.y))
+
 
 def main():
     global game_speed, x_pos_bg, y_pos_bg, obstacles, projectiles
@@ -129,8 +137,8 @@ def main():
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()  # CHANGED: Properly quit pygame
-                return False  # CHANGED: Return False to stop the loop
+                pygame.quit()
+                return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x and number_projectiles > 0:
                     projectiles.append(Projectile(player))
@@ -195,23 +203,24 @@ def menu(deathcount):
             text = font.render("Press any key to restart", True, (0, 0, 0))
             score = font.render("Your Score: " + str(points), True, (0, 0, 0))
             scoreRect = score.get_rect()
+
+            if points > highscore:
+                highscore = points
+
             highscoreText = font.render("Your HighScore: " + str(highscore), True, (0, 0, 0))
             highscoreRect = highscoreText.get_rect()
             scoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
             highscoreRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100)
-            if points > highscore:
-                highscore = points
-            url = 'http://localhost:5000/game/submit_score'
-            payload = {
-                'score': highscore,
-                'slug': 'dino',
-                'username': 'gigelinho'
-            }
-
-            requests.post(url, json=payload)
 
             SCREEN.blit(score, scoreRect)
             SCREEN.blit(highscoreText, highscoreRect)
+
+            # Add quit instruction
+            quit_text = font.render("Press Q to Quit", True, (0, 0, 0))
+            quit_rect = quit_text.get_rect()
+            quit_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150)
+            SCREEN.blit(quit_text, quit_rect)
+
         textRect = text.get_rect()
         textRect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         SCREEN.blit(text, textRect)
@@ -224,8 +233,20 @@ def menu(deathcount):
                 pygame.quit()
                 return False
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    url = 'http://localhost:5000/game/submit_score'
+                    payload = {
+                        'score': highscore,
+                        'slug': 'dino',
+                        'username': 'gigelinho'
+                    }
+
+                    requests.post(url, json=payload)
+                    pygame.quit()
+                    return False
                 return True
     return False
+
 
 highscore = 0
 deathcount = 0
@@ -238,5 +259,3 @@ while True:
             break
     else:
         break
-menu(deathcount = 0)
-
