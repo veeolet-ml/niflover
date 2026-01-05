@@ -5,6 +5,20 @@ from constants import *
 from blocks import *
 from grid import *
 
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-u", "--username", default="")
+    parser.add_argument("-s", "--server", default="localhost:5000")
+    return parser.parse_args()
+
+ARGS = parse_args()
+
+SERVER = ARGS.server.strip() or "localhost:5000"
+
+USERNAME = ARGS.username.strip()
+
 pygame.init()
 
 highscore = 0
@@ -184,7 +198,7 @@ class Game:
         restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100))
         self.screen.blit(restart_text, restart_rect)
 
-        quit_text = self.font.render("Press ESC to Quit", True, WHITE)
+        quit_text = self.font.render("Press Q to Quit", True, WHITE)
         quit_rect = quit_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 150))
         self.screen.blit(quit_text, quit_rect)
 
@@ -224,11 +238,11 @@ class Game:
             self.draw()
             self.clock.tick(60)
 
-        url = 'http://localhost:5000/game/submit_score'
+        url = f'http://{SERVER}/game/submit_score'
         payload = {
             'score': highscore,
             'slug': 'blockblast',
-            'username': 'gigelinho'
+            'username': USERNAME
         }
 
         requests.post(url, json=payload)
