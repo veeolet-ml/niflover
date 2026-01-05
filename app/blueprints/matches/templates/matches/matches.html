@@ -1,22 +1,100 @@
 {% extends "base.html" %}
-{% block title %}Your Matches{% endblock %}
+{% block title %}Matches{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h1 class="mb-4 text-center">Your Matches</h1>
+<div class="container-fluid py-3">
+  <div class="row g-3">
 
-  {% if matched_users %}
-    <ul class="list-group">
-      {% for user in matched_users %}
-        <li class="list-group-item">
-          {{ user.display_name }} <span class="text-muted">@{{ user.username }}</span>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <div class="alert alert-info text-center">
-      You don't have any matches yet.
+    <!-- LEFT SIDEBAR -->
+    <div class="col-12 col-md-4 col-lg-3">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Matches</div>
+        <div class="list-group list-group-flush">
+          {% if matches and matches|length > 0 %}
+            {% for m in matches %}
+              {% set is_active = active_match and (m.id == active_match.id) %}
+              <a
+                href="{{ url_for('matches.match_thread', match_id=m.id) }}"
+                class="list-group-item list-group-item-action {% if is_active %}active{% endif %}"
+              >
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    Match #{{ m.id }}
+                    <div class="small {% if is_active %}text-white-50{% else %}text-body-secondary{% endif %}">
+                      {{ m.created_at.strftime("%b %d, %Y") }}
+                    </div>
+                  </div>
+                  <span class="badge {% if is_active %}text-bg-light{% else %}text-bg-secondary{% endif %}">
+                    {{ m.messages|length if m.messages is defined else "" }}
+                  </span>
+                </div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <div class="p-3 text-body-secondary">No matches yet.</div>
+          {% endif %}
+        </div>
+      </div>
     </div>
-  {% endif %}
+
+    <!-- RIGHT PANEL -->
+    <div class="col-12 col-md-8 col-lg-9">
+      <div class="card shadow-sm h-100">
+
+        {% if not active_match %}
+          <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 60vh;">
+            <div class="text-center text-body-secondary">
+              <div class="fs-5 mb-2">Select a match</div>
+              <div>Choose someone on the left to start chatting.</div>
+            </div>
+          </div>
+        {% else %}
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold">Chat</div>
+              {% if other_user %}
+                <div class="small text-body-secondary">@{{ other_user.username }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card-body" style="height: 60vh; overflow:auto;">
+            {% if active_match.messages and active_match.messages|length > 0 %}
+              {% for msg in active_match.messages %}
+                <div class="mb-3">
+                  <div class="small text-body-secondary">
+                    {% if msg.sender_id == current_user.id %}You{% else %}Them{% endif %}
+                    • {{ msg.created_at.strftime("%b %d, %H:%M") }}
+                  </div>
+
+                  <div class="{% if msg.sender_id == current_user.id %}text-end{% endif %}">
+                    <span class="d-inline-block p-2 rounded-3 border">
+                      {{ msg.body }}
+                    </span>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-body-secondary">No messages yet. Say hi 👋</div>
+            {% endif %}
+          </div>
+
+          <div class="card-footer">
+            <form method="post" action="{{ url_for('matches.match_thread', match_id=active_match.id) }}" class="d-flex gap-2">
+              <input
+                class="form-control"
+                name="body"
+                placeholder="Type a message..."
+                maxlength="2000"
+                autocomplete="off"
+              />
+              <button class="btn btn-primary" type="submit">Send</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}
