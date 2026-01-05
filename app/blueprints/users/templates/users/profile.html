@@ -136,6 +136,34 @@
       </div>
     </div>
 
+    <!-- Games -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span class="fw-semibold">Games</span>
+        <span class="badge text-bg-secondary">{{ games|length if games is defined else 0 }}</span>
+      </div>
+
+      <div class="card-body">
+        {% if games is defined and games|length > 0 %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for game in games %}
+              <form method="post" action="/game/launch/{{ game.slug }}">
+                {% if csrf_token is defined %}
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% endif %}
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                  {{ game.title }}
+                </button>
+              </form>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-body-secondary">No games available.</div>
+        {% endif %}
+      </div>
+    </div>
+
+
     <!-- Game stats -->
     <div class="card shadow-sm">
       <div class="card-header d-flex align-items-center justify-content-between">
