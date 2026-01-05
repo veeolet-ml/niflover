@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, session
 from flask_login import login_user, logout_user, current_user
 from . import bp
 from .forms import RegistrationForm, LoginForm
@@ -52,5 +52,6 @@ def register():
 
 @bp.route('/logout')
 def logout():
+    session.pop('feed_ids', None)
     logout_user()
     return redirect(url_for('auth.login'))
