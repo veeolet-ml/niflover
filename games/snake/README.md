@@ -29,6 +29,7 @@ python main.py
 |--------|-------------|---------|
 | `-f`, `--food` | Number of food items on the grid | 3 |
 | `-s`, `--server` | Server address for score submission | `localhost:5000` |
+| `-u`, `--username` | Username for score submission | *(required)* |
 
 **Example:**
 

@@ -3,7 +3,6 @@ from enum import Enum
 import requests
 
 import pygame
-from pygame_textinput import TextInputVisualizer
 
 from HUD import HUD
 from food_manager import FoodManager
@@ -19,14 +18,10 @@ WIDTH = 1600
 HEIGHT = 900
 
 
-
-
 class GameState(Enum):
     START_GAME = 0
     GAME_RUNNING = 1
     GAME_OVER = 2
-    INPUT_USERNAME = 3
-
 
 class SnakeGame:
 
@@ -56,11 +51,6 @@ class SnakeGame:
         pygame.mixer.music.load("sounds/retro-arcade-game-music.mp3")
 
         pygame.key.set_repeat(200, 50)
-
-        self.username_visualiser = TextInputVisualizer(font_object=self.hud.font_small,
-                                                       font_color=(255, 255, 255))
-        self.password_visualiser = TextInputVisualizer(font_object=self.hud.font_small,
-                                                       font_color=(255, 255, 255))
 
     def reset_game(self) -> None:
         self.grid = SnakeGrid(self.screen.get_width(), int(self.screen.get_height() * 4 / 5),
@@ -95,6 +85,7 @@ class SnakeGame:
         self.hud.update(dt)  # Update HUD color fading
 
     def run(self) -> None:
+        pygame.mixer.music.set_volume(0.05)
         pygame.mixer.music.play(loops=-1)
         while self.running:
             self.events = pygame.event.get()
@@ -111,8 +102,6 @@ class SnakeGame:
                     self.run_game()
                 case GameState.GAME_OVER:
                     self.game_over()
-                case GameState.INPUT_USERNAME:
-                    self.input_username()
 
             self._post_frame_display()
 
@@ -158,26 +147,13 @@ class SnakeGame:
                     self.reset_game()
                     self.game_state = GameState.GAME_RUNNING
                 if event.key == pygame.K_SPACE:
-                    self.game_state = GameState.INPUT_USERNAME
-
-    def input_username(self) -> None:
-        self.hud.draw_input_username()
-        for event in self.events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    self.game_state = GameState.GAME_OVER
                     self.submit_results()
-        self.username_visualiser.update(self.events)
-        input_rect = self.username_visualiser.surface.get_rect(
-            center=(self.screen.get_width() // 2, self.screen.get_height() // 2)
-        )
-        self.screen.blit(self.username_visualiser.surface, input_rect)
+
 
 
     def submit_results(self) -> None:
-        """TODO: add POST request to submit results when database api is finished"""
         print(f"Submitting to server: {self.server_address}")
-        print(f"Username: {self.username_visualiser.manager.value}")
+        print(f"Username: {self.username}")
         print(f"High score: {self.score_manager.high_score}")
 
         url = f"http://{self.server_address}/game/submit_score"
@@ -186,9 +162,7 @@ class SnakeGame:
             "score": self.score_manager.high_score,
             "username": self.username
         }
-
-        requests.post(url, json=payload)
-
-
-
-
+        try:
+            requests.post(url, json=payload)
+        except requests.exceptions.RequestException as e:
+            print("Server unreachable")
