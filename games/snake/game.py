@@ -162,5 +162,7 @@ class SnakeGame:
             "score": self.score_manager.high_score,
             "username": self.username
         }
-
-        requests.post(url, json=payload)
+        try:
+            requests.post(url, json=payload)
+        except requests.exceptions.RequestException as e:
+            print("Server unreachable")
