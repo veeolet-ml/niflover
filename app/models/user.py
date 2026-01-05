@@ -46,6 +46,7 @@ class User(UserMixin, db.Model):
     # in User model
     messages_sent = db.relationship(
         "Message",
+        back_populates="sender",
         foreign_keys="Message.sender_id",
         lazy="selectin",
     )

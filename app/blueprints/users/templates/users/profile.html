@@ -1,7 +1,7 @@
 {# templates/profile.html #}
 {% extends "base.html" %}
 
-{% block title %}{{ user.display_name }} • Profile{% endblock %}
+{% block title %}{{ user.display_name }}{% endblock %}
 
 {% block content %}
 <div class="row g-4">
@@ -92,14 +92,19 @@
               </a>
             </div>
           {% else %}
-            <div class="d-flex gap-2">
-              <form method="post" action="{{ url_for('main.pass_user', target_id=user.id) }}">
-                <button class="btn btn-outline-secondary btn-sm" type="submit">Pass</button>
-              </form>
-              <form method="post" action="{{ url_for('main.like_user', target_id=user.id) }}">
-                <button class="btn btn-success btn-sm" type="submit">Like</button>
-              </form>
-            </div>
+            {% if not has_acted %}
+              <div class="d-flex gap-2">
+                <form method="post" action="{{ url_for('main.pass_user', target_id=user.id) }}">
+                  <button class="btn btn-outline-secondary btn-sm" type="submit">Pass</button>
+                </form>
+                <form method="post" action="{{ url_for('main.like_user', target_id=user.id) }}">
+                  <button class="btn btn-success btn-sm" type="submit">Like</button>
+                </form>
+              </div>
+            {% else %}
+              <span class="text-body-secondary small">
+              </span>
+            {% endif %}
           {% endif %}
         </div>
 
@@ -111,7 +116,7 @@
           {% if user.bio %}
             <p class="mb-0" style="white-space: pre-wrap;">{{ user.bio }}</p>
           {% else %}
-            <p class="mb-0 text-body-secondary">This user hasn’t written a bio yet.</p>
+            <p class="mb-0 text-body-secondary">This user hasn't written a bio yet.</p>
           {% endif %}
         </div>
       </div>
@@ -137,31 +142,33 @@
     </div>
 
     <!-- Games -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-header d-flex align-items-center justify-content-between">
-        <span class="fw-semibold">Games</span>
-        <span class="badge text-bg-secondary">{{ games|length if games is defined else 0 }}</span>
-      </div>
+    {% if current_user.is_authenticated and current_user.id == user.id %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <span class="fw-semibold">Games</span>
+          <span class="badge text-bg-secondary">{{ games|length if games is defined else 0 }}</span>
+        </div>
 
-      <div class="card-body">
-        {% if games is defined and games|length > 0 %}
-          <div class="d-flex flex-wrap gap-2">
-            {% for game in games %}
-              <form method="post" action="/game/launch/{{ game.slug }}">
-                {% if csrf_token is defined %}
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                {% endif %}
-                <button type="submit" class="btn btn-outline-primary btn-sm">
-                  {{ game.title }}
-                </button>
-              </form>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-body-secondary">No games available.</div>
-        {% endif %}
+        <div class="card-body">
+          {% if games is defined and games|length > 0 %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for game in games %}
+                <form method="post" action="/game/launch/{{ game.slug }}">
+                  {% if csrf_token is defined %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  {% endif %}
+                  <button type="submit" class="btn btn-outline-primary btn-sm">
+                    {{ game.title }}
+                  </button>
+                </form>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-body-secondary">No games available.</div>
+          {% endif %}
+        </div>
       </div>
-    </div>
+    {% endif %}
 
 
     <!-- Game stats -->

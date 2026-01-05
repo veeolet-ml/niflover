@@ -20,6 +20,12 @@ class Message(db.Model):
         index=True,
     )
 
+    sender = db.relationship(
+        "User",
+        back_populates="messages_sent",
+        foreign_keys=[sender_id],
+    )
+
     body = db.Column(db.Text, nullable=False)
 
     created_at = db.Column(

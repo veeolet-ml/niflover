@@ -23,6 +23,8 @@ def matches():
         .all()
     )
 
+    other_by_match = {m.id: other_participant(m, current_user.id) for m in matches}
+
     # matched_users = []
     # for m in matches:
     #     other_id = m.user_b_id if m.user_a_id == current_user.id else m.user_a_id
@@ -33,6 +35,7 @@ def matches():
     return render_template(
         "matches/matches.html",
         matches=matches,
+        other_by_match=other_by_match,
         active_match=None,
         other_user=None
     )
@@ -49,6 +52,8 @@ def match_thread(match_id):
         .order_by(Match.created_at.desc())
         .all()
     )
+
+    other_by_match = {m.id: other_participant(m, current_user.id) for m in matches}
 
     active_match = (
         Match.query.options(selectinload(Match.messages))
@@ -80,6 +85,7 @@ def match_thread(match_id):
     return render_template(
         "matches/matches.html",
         matches=matches,
+        other_by_match=other_by_match,
         active_match=active_match,
         other_user=other_user
     )

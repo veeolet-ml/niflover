@@ -13,23 +13,54 @@
           {% if matches and matches|length > 0 %}
             {% for m in matches %}
               {% set is_active = active_match and (m.id == active_match.id) %}
+              {% set u = other_by_match[m.id] %}
+
               <a
                 href="{{ url_for('matches.match_thread', match_id=m.id) }}"
-                class="list-group-item list-group-item-action {% if is_active %}active{% endif %}"
+                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 {% if is_active %}active{% endif %}"
               >
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    Match #{{ m.id }}
-                    <div class="small {% if is_active %}text-white-50{% else %}text-body-secondary{% endif %}">
-                      {{ m.created_at.strftime("%b %d, %Y") }}
-                    </div>
+                <!-- Avatar -->
+                {% if u and u.photos and u.photos|length > 0 %}
+                  <img
+                    src="{{ url_for('static', filename=u.photos[0].path) }}"
+                    alt="{{ u.username }}"
+                    class="rounded-circle flex-shrink-0"
+                    style="width:46px;height:46px;object-fit:cover;"
+                  >
+                {% else %}
+                  <div
+                    class="rounded-circle border flex-shrink-0 d-flex align-items-center justify-content-center"
+                    style="width:46px;height:46px;"
+                  >
+                    <span class="small text-body-secondary">?</span>
                   </div>
-                  <span class="badge {% if is_active %}text-bg-light{% else %}text-bg-secondary{% endif %}">
-                    {{ m.messages|length if m.messages is defined else "" }}
-                  </span>
+                {% endif %}
+
+                <!-- Name + username + date -->
+                <div class="min-w-0 flex-grow-1">
+                  <div class="d-flex align-items-center justify-content-between gap-2">
+                    <div class="min-w-0">
+                      <div class="fw-semibold text-truncate">
+                        {{ u.display_name or u.username }}
+                      </div>
+                      <div class="small {% if is_active %}text-white-50{% else %}text-body-secondary{% endif %} text-truncate">
+                        @{{ u.username }}
+                      </div>
+                    </div>
+
+                    <!-- Count badge (optional) -->
+                    <span class="badge rounded-pill {% if is_active %}text-bg-light{% else %}text-bg-secondary{% endif %}">
+                      {{ m.messages|length if m.messages is defined else 0 }}
+                    </span>
+                  </div>
+
+                  <div class="small {% if is_active %}text-white-50{% else %}text-body-secondary{% endif %}">
+                    {{ m.created_at.strftime("%b %d, %Y") }}
+                  </div>
                 </div>
               </a>
             {% endfor %}
+
           {% else %}
             <div class="p-3 text-body-secondary">No matches yet.</div>
           {% endif %}
@@ -53,7 +84,10 @@
             <div>
               <div class="fw-semibold">Chat</div>
               {% if other_user %}
-                <div class="small text-body-secondary">@{{ other_user.username }}</div>
+                <a class="text-decoration-none"
+                  href="{{ url_for('users.profile', username=other_user.username) }}">
+                  @{{ other_user.username }}
+                </a>
               {% endif %}
             </div>
           </div>
@@ -87,6 +121,7 @@
                 placeholder="Type a message..."
                 maxlength="2000"
                 autocomplete="off"
+                autofocus
               />
               <button class="btn btn-primary" type="submit">Send</button>
             </form>
