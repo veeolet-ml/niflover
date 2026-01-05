@@ -7,9 +7,11 @@ from grid import *
 
 pygame.init()
 
+highscore = 0
 
 class Game:
     def __init__(self):
+        global highscore
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Block Blast")
         self.clock = pygame.time.Clock()
@@ -45,7 +47,6 @@ class Game:
             if self.game_over:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        # Restart game
                         self.__init__()
                     elif event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
                         self.running = False
@@ -158,10 +159,14 @@ class Game:
                 self.game_over = True
 
     def draw_game_over(self):
+        global highscore
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         overlay.set_alpha(200)
         overlay.fill(BLACK)
         self.screen.blit(overlay, (0, 0))
+
+        if highscore < self.score:
+            highscore = self.score
 
         game_over_text = self.big_font.render("GAME OVER", True, RED)
         game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
@@ -171,12 +176,16 @@ class Game:
         score_rect = score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         self.screen.blit(score_text, score_rect)
 
+        highscore_text = self.font.render(f"HighScore: {highscore}", True, WHITE)
+        highscore_rect = score_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 40))
+        self.screen.blit(highscore_text, highscore_rect)
+
         restart_text = self.font.render("Press R to Restart", True, WHITE)
-        restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80))
+        restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100))
         self.screen.blit(restart_text, restart_rect)
 
         quit_text = self.font.render("Press ESC to Quit", True, WHITE)
-        quit_rect = quit_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 130))
+        quit_rect = quit_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 150))
         self.screen.blit(quit_text, quit_rect)
 
     def draw(self):
@@ -217,7 +226,7 @@ class Game:
 
         url = 'http://localhost:5000/game/submit_score'
         payload = {
-            'score': self.score,
+            'score': highscore,
             'slug': 'blockblast',
             'username': 'gigelinho'
         }
