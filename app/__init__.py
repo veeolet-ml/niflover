@@ -40,5 +40,7 @@ def register_extensions(app):
 def register_cli_commands(app):
     from .cli.users import user as user_cli
     from .cli.hobbies import hobby as hobby_cli
+    from .cli.games import game as game_cli
     app.cli.add_command(user_cli)
     app.cli.add_command(hobby_cli)
+    app.cli.add_command(game_cli)

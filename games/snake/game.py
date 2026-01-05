@@ -1,5 +1,6 @@
 import random
 from enum import Enum
+import requests
 
 import pygame
 from pygame_textinput import TextInputVisualizer
@@ -29,8 +30,9 @@ class GameState(Enum):
 
 class SnakeGame:
 
-    def __init__(self, food_items: int, server_address: str = "localhost:8080") -> None:
+    def __init__(self, food_items: int, server_address: str = "localhost:5000", username: str = "") -> None:
         self.server_address = server_address
+        self.username = username
         self.events = None
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -177,6 +179,15 @@ class SnakeGame:
         print(f"Submitting to server: {self.server_address}")
         print(f"Username: {self.username_visualiser.manager.value}")
         print(f"High score: {self.score_manager.high_score}")
+
+        url = f"http://{self.server_address}/game/submit_score"
+        payload = {
+            "slug": "snake",
+            "score": self.score_manager.high_score,
+            "username": self.username
+        }
+
+        requests.post(url, json=payload)
 
 
 
