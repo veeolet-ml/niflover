@@ -1,14 +1,12 @@
+from sqlalchemy import select
 from app.extensions import db
 from app.models import UserAction, User, Match
 from flask_login import current_user
 from flask import session
 
 def feed_ids():
-    acted_user_ids = (
-        db.session.query(UserAction.target_id)
-        .filter(
-            UserAction.actor_id == current_user.id,
-        ).subquery()
+    acted_user_ids = select(UserAction.target_id).where(
+        UserAction.actor_id == current_user.id
     )
 
     candidates = (
@@ -18,6 +16,8 @@ def feed_ids():
         .order_by(User.id.asc())
         .all()
     )
+
+    # TODO: sort based on matchmaking algorithm
 
     return [user.id for user in candidates]
 
