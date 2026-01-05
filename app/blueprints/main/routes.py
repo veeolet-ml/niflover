@@ -23,33 +23,6 @@ def index():
 
     return render_template('main/index.html', candidate=candidate)
 
-@bp.get("/matches")
-@login_required
-def matches():
-    """
-    List all users the current user has matched with.
-    """
-    matches = (
-        Match.query
-        .filter(or_(
-            Match.user_a_id == current_user.id,
-            Match.user_b_id == current_user.id
-        ))
-        .all()
-    )
-
-    matched_users = []
-    for m in matches:
-        other_id = m.user_b_id if m.user_a_id == current_user.id else m.user_a_id
-        other_user = User.query.get(other_id)
-        if other_user:
-            matched_users.append(other_user)
-
-    return render_template(
-        "main/matches.html",
-        matched_users=matched_users
-    )
-
 
 @bp.post('/like/<int:target_id>')
 @login_required
@@ -163,10 +136,14 @@ def submit_game_score():
 
     return redirect(request.referrer or url_for('main.index'))
 
-@bp.post('/game/launch_snake')
+@bp.post('/game/launch/<string:slug>')
 @login_required
-def launch_snake():
-    path = Path(current_app.root_path).parent / 'games' / 'snake' / 'main.py'
+def launch(slug):
+    path = Path(current_app.root_path).parent / 'games' / slug / 'main.py'
+    game = db.session.query(Game).filter_by(slug=slug).first()
+    if not game:
+        flash('Game not found.', 'danger')
+        return redirect(url_for('main.index'))
     subprocess.Popen([sys.executable, str(path), '-s', 'localhost:5000', '-u', current_user.username])
-    flash('Snake game launched in a separate window.', 'info')
+    flash(f'{game.title} game launched in a separate window.', 'info')
     return redirect(url_for('main.index'))  

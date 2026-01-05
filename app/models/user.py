@@ -19,7 +19,7 @@ class User(UserMixin, db.Model):
     display_name = db.Column(db.String(100), nullable=False)
     bio = db.Column(db.Text, nullable=True)
 
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     photos = db.relationship(
         'UserPhoto', 
@@ -42,6 +42,15 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan',
         lazy='selectin'
     )
+
+    # in User model
+    messages_sent = db.relationship(
+        "Message",
+        back_populates="sender",
+        foreign_keys="Message.sender_id",
+        lazy="selectin",
+    )
+
 
     __table_args__ = (
         CheckConstraint('length(username) >= 3', name='ck_user_username_length'),
@@ -111,7 +120,7 @@ class UserAction(db.Model):
 
     action = db.Column(db.Enum(ActionType, name="action_type"), nullable=False)
 
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     __table_args__ = (
         UniqueConstraint('actor_id', 'target_id', name='uq_useraction_actor_target'),
