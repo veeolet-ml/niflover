@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 from flask import redirect, render_template, url_for, abort, request, current_app
 from flask_login import login_required, current_user
 
-from app.models import User, Hobby, user
+from app.models import User, Hobby, Game
 from app.extensions import db
 from .forms import UpdateProfileForm
 from .utils import save_photo_file, delete_photo_file, get_photo_by_position, normalize_photo_positions
@@ -15,7 +15,8 @@ from . import bp
 @login_required
 def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template('users/profile.html', user=user)
+    games = Game.query.order_by(Game.title.asc()).all()
+    return render_template('users/profile.html', user=user, games=games)
 
 @bp.route('/<string:username>/update', methods=['GET', 'POST'])
 @login_required
