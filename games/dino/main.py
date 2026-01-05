@@ -4,6 +4,20 @@ import requests
 from dinosaur import Dinosaur
 from constants import *
 
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-u", "--username", default="")
+    parser.add_argument("-s", "--server", default="localhost:5000")
+    return parser.parse_args()
+
+ARGS = parse_args()
+
+SERVER = ARGS.server.strip() or "localhost:5000"
+
+USERNAME = ARGS.username.strip()
+
 pygame.init()
 
 
@@ -234,11 +248,11 @@ def menu(deathcount):
                 return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
-                    url = 'http://localhost:5000/game/submit_score'
+                    url = f'http://{SERVER}/game/submit_score'
                     payload = {
                         'score': highscore,
                         'slug': 'dino',
-                        'username': 'gigelinho'
+                        'username': USERNAME
                     }
 
                     requests.post(url, json=payload)
